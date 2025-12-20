@@ -1,31 +1,22 @@
 def kaprekar_step(n):
-    """Aplica una iteración de los pasos de Kaprekar."""
-    s = f"{n:04d}"
-    # Ordenar descendente y ascendente
-    digits_desc = sorted(s, reverse=True)
-    digits_asc = sorted(s)
-    
-    large = int("".join(digits_desc))
-    small = int("".join(digits_asc))
-    
-    return large - small
+    """Applies one iteration of the Kaprekar routine."""
+    # Sort once: s is ascending. s[::-1] is descending.
+    s = sorted(f"{n:04d}")
+    return int("".join(s[::-1])) - int("".join(s))
 
 def get_alpha_beta(n):
-    """Extrae parámetros alpha (a-d) y beta (b-c)."""
-    s = f"{n:04d}"
-    d = sorted(s, reverse=True)
-    # d[0]=a, d[1]=b, d[2]=c, d[3]=d
-    return (int(d[0]) - int(d[3])), (int(d[1]) - int(d[2]))
+    """Extracts alpha (a-d) and beta (b-c) parameters."""
+    d = [int(x) for x in sorted(f"{n:04d}", reverse=True)]
+    return (d[0] - d[3]), (d[1] - d[2])
 
 def verify_dominance():
-    # Diccionario para guardar el peor caso
-    results = {a: {'max_steps': 0} for a in range(1, 10)}
+    # Store worst case: {alpha: {'max_steps': 0, 'critical_beta': -1}}
+    results = {a: {'max_steps': 0, 'critical_beta': -1} for a in range(1, 10)}
     
     for n in range(10000):
-        if n % 1111 == 0: continue
+        if n % 1111 == 0: continue # Ignore repdigits
         
-        steps = 0
-        current = n
+        steps, current = 0, n
         while current != 6174 and steps <= 8:
             current = kaprekar_step(current)
             steps += 1
@@ -33,12 +24,15 @@ def verify_dominance():
         if current == 6174:
             alpha, beta = get_alpha_beta(n)
             if steps > results[alpha]['max_steps']:
-                results[alpha]['max_steps'] = steps
-
-    print("Verificación completada.")
+                results[alpha].update({'max_steps': steps, 'critical_beta': beta})
+                
+    print("Alpha Class | Critical Beta | Max Steps")
+    for alpha in sorted(results, reverse=True):
+        print(f"{alpha:^11} | {results[alpha]['critical_beta']:^13} | {results[alpha]['max_steps']:^9}")
 
 if __name__ == "__main__":
-    verify_dominance
+    verify_dominance()
+
 
 
 
